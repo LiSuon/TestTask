@@ -1,0 +1,38 @@
+services:
+  WebServer_db:
+    image: db
+    build:
+      context: ./Database
+    container_name: WebServer_db
+    restart: always
+    environment:
+      POSTGRES_DB: "WebServer"
+      POSTGRES_USER: "admin"
+      POSTGRES_PASSWORD: "qwerty"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    ports:
+      - "5433:5432"
+    volumes: 
+      - ./Database/postgres:/var/lib/postgresql/data
+      - ./Database:/docker-entrypoint-initdb.d/
+    networks:
+      - server_net
+
+  WebServer:
+    image: webserver
+    build:
+      context: ./WebServer
+    container_name: WebServer
+    restart: always
+    ports:
+      - "8001:8000"
+    environment:
+      DATABASE_HOST: "WebServer_db"
+      DATABASE_PORT: "5432"
+    networks:
+      - server_net
+
+networks:
+  server_net:
+    name: server_net
+    driver: bridge
